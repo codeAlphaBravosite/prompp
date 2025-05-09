@@ -1,5 +1,5 @@
-const VERSION = '1.0.5';
-const CACHE_NAME = `library-cache-${VERSION}`;
+const VERSION = '1.0.0';
+const CACHE_NAME = `libraryy-cache-${VERSION}`;
 
 const STATIC_CACHE_URLS = [
   './',
@@ -22,7 +22,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName.startsWith('library-cache-') && cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith('libraryy-cache-') && cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
