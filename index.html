@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="icon" href="./icon-192x192.png" type="image/png">
+    <link rel="shortcut icon" href="./icon-192x192.png" type="image/png">
+    <link rel="apple-touch-icon" href="./icon-192x192.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <style>
+        /* --- START OF style.css --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e1e4e8;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .btn-add {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(3, 102, 214, 0.2);
+        }
+
+        .btn-add:hover {
+            background-color: #0256b4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(3, 102, 214, 0.2);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .note {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .note:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .note-date {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .note-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.4rem;
+            color: #666;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .note-btn:hover {
+            background-color: #e1e4e8;
+            color: #333;
+        }
+
+        .note-btn.locked {
+            color: #e74c3c;
+        }
+
+        .note-btn.delete-btn:hover {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .note-title {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: white;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .note-title:focus {
+            outline: none;
+            background-color: #f8f9fa;
+        }
+
+        .note-content {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: none;
+            resize: none;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            background-color: white;
+        }
+
+        .note-content:focus {
+            outline: none;
+            background-color: #f8f9fa;
+        }
+
+        .note-title.locked,
+        .note-content.locked {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+            color: #666;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #2c3e50;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .material-icons {
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .note-actions {
+                gap: 0.25rem;
+            }
+            
+            .note-btn {
+                padding: 0.3rem;
+            }
+        }
+        /* --- END OF style.css --- */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Library</h1>
+            <button id="addNote" class="btn-add">
+                <span class="material-icons">add</span>
+                New
+            </button>
+        </header>
+        <div id="notesContainer" class="notes-grid"></div>
+    </div>
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        // --- START OF toastUtils.js ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        // --- END OF toastUtils.js ---
+
+        // --- START OF clipboardUtils.js ---
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    showToast('Copied to clipboard!');
+                })
+                .catch(err => {
+                    showToast('Failed to copy text');
+                });
+        }
+        // --- END OF clipboardUtils.js ---
+
+        // --- START OF dateUtils.js ---
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+        // --- END OF dateUtils.js ---
+
+        // --- START OF dialog.js ---
+        class DialogManager {
+          constructor() {
+            this.init();
+          }
+
+          init() {
+            const style = document.createElement('style');
+            style.textContent = `
+              .dialog-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.2s ease-in-out;
+              }
+
+              .dialog-overlay.visible {
+                opacity: 1;
+              }
+
+              .dialog-container {
+                background: white;
+                border-radius: 8px;
+                padding: 24px;
+                max-width: 400px;
+                width: 90%;
+                transform: translateY(-20px);
+                transition: transform 0.2s ease-in-out;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+              }
+
+              .dialog-overlay.visible .dialog-container {
+                transform: translateY(0);
+              }
+
+              .dialog-title {
+                font-size: 1.2em;
+                font-weight: 600;
+                margin: 0 0 12px 0;
+                color: #2c3e50;
+              }
+
+              .dialog-message {
+                margin: 0 0 24px 0;
+                color: #34495e;
+                line-height: 1.5;
+              }
+
+              .dialog-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+              }
+
+              .dialog-btn {
+                padding: 8px 16px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+              }
+
+              .dialog-btn:hover {
+                transform: translateY(-1px);
+              }
+
+              .dialog-btn-confirm {
+                background-color: #e74c3c; /* Default danger type */
+                color: white;
+              }
+              
+              /* Added styles for other types if implemented, e.g.
+              .dialog-btn-confirm.info { background-color: #3498db; }
+              .dialog-btn-confirm.info:hover { background-color: #2980b9; }
+              .dialog-btn-confirm.warning { background-color: #f1c40f; }
+              .dialog-btn-confirm.warning:hover { background-color: #f39c12; }
+              */
+
+              .dialog-btn-confirm:hover {
+                background-color: #c0392b; /* Default danger type hover */
+              }
+
+              .dialog-btn-cancel {
+                background-color: #ecf0f1;
+                color: #2c3e50;
+              }
+
+              .dialog-btn-cancel:hover {
+                background-color: #bdc3c7;
+              }
+            `;
+            document.head.appendChild(style);
+          }
+
+          confirm(options = {}) {
+            const {
+              title = 'Confirm',
+              message = 'Are you sure?',
+              confirmText = 'Confirm',
+              cancelText = 'Cancel',
+              type = 'danger' // or 'info', 'warning' - currently only affects default confirm button color
+            } = options;
+
+            return new Promise((resolve) => {
+              const overlay = document.createElement('div');
+              overlay.className = 'dialog-overlay';
+              
+              overlay.innerHTML = `
+                <div class="dialog-container">
+                  <h3 class="dialog-title">${title}</h3>
+                  <p class="dialog-message">${message}</p>
+                  <div class="dialog-buttons">
+                    <button class="dialog-btn dialog-btn-cancel">${cancelText}</button>
+                    <button class="dialog-btn dialog-btn-confirm">${confirmText}</button>
+                  </div>
+                </div>
+              `;
+              
+              // Optional: Adjust confirm button style based on type
+              // const confirmButton = overlay.querySelector('.dialog-btn-confirm');
+              // if (type === 'info') { confirmButton.classList.add('info'); }
+              // else if (type === 'warning') { confirmButton.classList.add('warning'); }
+
+
+              const closeDialog = (result) => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                  overlay.remove();
+                  resolve(result);
+                }, 200); // Matches CSS transition time
+              };
+
+              overlay.querySelector('.dialog-btn-confirm').addEventListener('click', () => closeDialog(true));
+              overlay.querySelector('.dialog-btn-cancel').addEventListener('click', () => closeDialog(false));
+              
+              document.body.appendChild(overlay);
+              // Trigger reflow to ensure transition works
+              overlay.offsetHeight; 
+              overlay.classList.add('visible');
+            });
+          }
+        }
+        // --- END OF dialog.js ---
+
+        // --- START OF noteManager.js ---
+        class NoteManager {
+          constructor() {
+            this.notes = JSON.parse(localStorage.getItem('notes')) || [];
+          }
+
+          addNote() {
+            const note = {
+              id: Date.now(),
+              title: '',
+              content: '',
+              isLocked: false,
+              createdAt: new Date().toISOString()
+              // Removed 'order' property as array order is the source of truth
+            };
+            this.notes.unshift(note); // FIX: Add to the beginning of the array
+            this.saveToLocalStorage();
+            return note;
+          }
+
+          updateNote(id, updates) {
+            const note = this.notes.find(note => note.id === id);
+            if (note && !note.isLocked) {
+              Object.assign(note, updates);
+              this.saveToLocalStorage();
+            }
+          }
+
+          deleteNote(id) {
+            const index = this.notes.findIndex(note => note.id === id);
+            if (index !== -1) {
+              this.notes.splice(index, 1);
+              this.saveToLocalStorage();
+            }
+          }
+
+          moveNote(id, direction) {
+            const index = this.notes.findIndex(note => note.id === id);
+            if (index === -1) return;
+            
+            const newIndex = direction === 'up' ? index - 1 : index + 1;
+            if (newIndex >= 0 && newIndex < this.notes.length) {
+              const note = this.notes[index];
+              this.notes.splice(index, 1);
+              this.notes.splice(newIndex, 0, note);
+              this.saveToLocalStorage();
+            }
+          }
+
+          toggleLock(id) {
+            const note = this.notes.find(note => note.id === id);
+            if (note) {
+              note.isLocked = !note.isLocked;
+              this.saveToLocalStorage();
+            }
+          }
+
+          saveToLocalStorage() {
+            localStorage.setItem('notes', JSON.stringify(this.notes));
+          }
+        }
+        // --- END OF noteManager.js ---
+
+        // --- START OF noteElement.js ---
+        const dialog = new DialogManager();
+
+        function createNoteElement(note, noteManager, onNoteUpdate) {
+            const noteDiv = document.createElement('div');
+            noteDiv.className = 'note';
+            noteDiv.dataset.noteId = note.id;
+            noteDiv.innerHTML = `
+                <div class="note-header">
+                    <div class="note-date">${formatDate(note.createdAt)}</div>
+                    <div class="note-actions">
+                        <button class="note-btn" data-action="moveUp" title="Move up">
+                            <span class="material-icons">arrow_upward</span>
+                        </button>
+                        <button class="note-btn" data-action="moveDown" title="Move down">
+                            <span class="material-icons">arrow_downward</span>
+                        </button>
+                        <button class="note-btn" data-action="copy" title="Copy note content">
+                            <span class="material-icons">content_copy</span>
+                        </button>
+                        <button class="note-btn ${note.isLocked ? 'locked' : ''}" data-action="lock" title="Toggle lock">
+                            <span class="material-icons">${note.isLocked ? 'lock' : 'lock_open'}</span>
+                        </button>
+                        <button class="note-btn delete-btn" data-action="delete" title="Delete note">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+                <input type="text" 
+                    class="note-title ${note.isLocked ? 'locked' : ''}"
+                    placeholder="Note title"
+                    value="${note.title || ''}"
+                    ${note.isLocked ? 'readonly' : ''}
+                >
+                <textarea
+                    class="note-content ${note.isLocked ? 'locked' : ''}"
+                    placeholder="Write your note here..." spellcheck="false" 
+                    ${note.isLocked ? 'readonly' : ''}
+                >${note.content || ''}</textarea>
+            `;
+
+            setupNoteEventListeners(noteDiv, note, noteManager, onNoteUpdate);
+            return noteDiv;
+        }
+
+        function setupNoteEventListeners(noteDiv, note, noteManager, onNoteUpdate) {
+            const titleInput = noteDiv.querySelector('.note-title');
+            const textarea = noteDiv.querySelector('.note-content');
+
+            titleInput.addEventListener('input', () => {
+                if (!note.isLocked) { // Double check lock status before update
+                    noteManager.updateNote(note.id, { title: titleInput.value });
+                }
+            });
+
+            textarea.addEventListener('input', () => {
+                 if (!note.isLocked) { // Double check lock status before update
+                    noteManager.updateNote(note.id, { content: textarea.value });
+                }
+            });
+
+            noteDiv.querySelectorAll('.note-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const action = btn.dataset.action;
+                    handleNoteAction(action, note, noteManager, noteDiv, titleInput, textarea, btn, onNoteUpdate);
+                });
+            });
+        }
+
+        function handleNoteAction(action, note, noteManager, noteDiv, titleInput, textarea, btn, onNoteUpdate) {
+            switch(action) {
+                case 'copy':
+                    copyToClipboard(textarea.value);
+                    break;
+                case 'lock':
+                    handleLockToggle(note, noteManager, titleInput, textarea, btn);
+                    break;
+                case 'delete':
+                    handleDelete(note, noteManager, noteDiv, onNoteUpdate); // Pass onNoteUpdate for potential re-render
+                    break;
+                case 'moveUp':
+                case 'moveDown':
+                    noteManager.moveNote(note.id, action === 'moveUp' ? 'up' : 'down');
+                    onNoteUpdate(); // Re-render all notes to reflect new order
+                    break;
+            }
+        }
+
+        function handleLockToggle(note, noteManager, titleInput, textarea, btn) {
+            noteManager.toggleLock(note.id);
+            // Update note object reference in case toggleLock creates a new object (it doesn't currently)
+            const updatedNote = noteManager.notes.find(n => n.id === note.id) || note; 
+
+            [titleInput, textarea].forEach(el => {
+                el.classList.toggle('locked', updatedNote.isLocked);
+                el.readOnly = updatedNote.isLocked;
+            });
+            btn.classList.toggle('locked', updatedNote.isLocked);
+            btn.querySelector('.material-icons').textContent = 
+                updatedNote.isLocked ? 'lock' : 'lock_open';
+        }
+
+        async function handleDelete(note, noteManager, noteDiv, onNoteUpdate) {
+            const confirmed = await dialog.confirm({
+                title: 'Delete Note',
+                message: 'Are you sure?',
+                confirmText: 'Delete',
+                cancelText: 'Cancel'
+            });
+
+            if (confirmed) {
+                noteManager.deleteNote(note.id);
+                noteDiv.remove(); // Optimistic update
+                // Optionally, call onNoteUpdate() if there are other dependencies or for consistency,
+                // though removing the div directly is often fine.
+                // onNoteUpdate(); 
+            }
+        }
+        // --- END OF noteElement.js ---
+
+        // --- START OF main.js ---
+        const noteManager = new NoteManager();
+        const notesContainer = document.getElementById('notesContainer');
+
+        function renderNotes() {
+            notesContainer.innerHTML = '';
+            // Notes are rendered in the order they exist in noteManager.notes
+            // New notes are added to the front (unshift), so they appear first.
+            noteManager.notes.forEach(note => {
+                notesContainer.appendChild(createNoteElement(note, noteManager, renderNotes));
+            });
+        }
+
+        document.getElementById('addNote').addEventListener('click', () => {
+            const note = noteManager.addNote(); // Adds to the beginning of the array
+            // Insert the new note element at the beginning of the container
+            notesContainer.insertBefore(
+                createNoteElement(note, noteManager, renderNotes),
+                notesContainer.firstChild
+            );
+            // No full re-render needed here, as the new note is correctly placed.
+            // Other notes' relative order doesn't change from this action alone.
+        });
+
+        // Initial render
+        renderNotes();
+        // --- END OF main.js ---
+    </script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js') // This file (sw.js) is not part of this single HTML.
+            .then(registration => {
+              console.log('Service Worker registered successfully:', registration.scope);
+            })
+            .catch(error => {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+</body>
+</html>
